@@ -25,10 +25,7 @@ const routes: Routes = [
   {
     path: 'upload',
     component: UploadComponent,
-    canActivate: [RoleGuard],
-    data: {
-      role: 'contributor'
-    }
+    canActivate: [AuthGuard]
   },
   {
     path: 'profile',

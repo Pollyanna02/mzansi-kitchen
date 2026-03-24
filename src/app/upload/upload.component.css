@@ -57,6 +57,7 @@
 .pill-row button,
 .section-head button,
 .submit-row button,
+.file-trigger,
 .image-card button,
 .ingredient-row button,
 .step-row button {
@@ -115,6 +116,14 @@
   background: var(--cream);
 }
 
+.file-input {
+  display: none;
+}
+
+.file-trigger {
+  justify-self: start;
+}
+
 .field-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -130,6 +139,12 @@
   background: var(--brown) !important;
   border-color: var(--brown) !important;
   color: #fff !important;
+}
+
+.danger-btn {
+  background: #fff3f0 !important;
+  border-color: #d38b78 !important;
+  color: #a13f28 !important;
 }
 
 .image-grid {
@@ -221,6 +236,7 @@ ul {
 .success-overlay {
   position: fixed;
   inset: 0;
+  z-index: 1000;
   display: grid;
   place-items: center;
   background: rgba(42, 26, 10, 0.6);

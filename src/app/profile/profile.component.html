@@ -11,7 +11,7 @@
     </div>
     <div class="profile-actions">
       <button type="button" (click)="toggleEditProfile()">{{ editingProfile ? 'Cancel' : 'Edit profile' }}</button>
-      <a routerLink="/upload" class="primary-btn">Upload recipe</a>
+      <a routerLink="/upload" class="primary-btn">Upload recipe, picture and instructions</a>
     </div>
   </div>
 
@@ -33,7 +33,7 @@
       <span>Following</span>
     </article>
     <article class="stat-card">
-      <strong>{{ averageRating | number:'1.1-1' }}</strong>
+      <strong>{{ profileReviews.length ? (averageRating | number:'1.1-1') : '—' }}</strong>
       <span>Avg rating</span>
     </article>
   </div>
@@ -75,6 +75,11 @@
       </div>
 
       <section class="card recipe-grid" *ngIf="activeTab === 'recipes'">
+        <article class="empty-state" *ngIf="!myRecipes.length">
+          <h3>No recipes yet</h3>
+          <p>Upload your own recipe and add a picture so it appears here on your profile.</p>
+          <a routerLink="/upload" class="primary-btn">Upload recipe, picture and instructions</a>
+        </article>
         <article class="recipe-card" *ngFor="let recipe of myRecipes">
           <div class="recipe-cover">
             <img [src]="recipe.imageUrl" [alt]="recipe.title" />
@@ -85,12 +90,17 @@
           </div>
           <div class="card-actions">
             <button type="button" (click)="openRecipe(recipe.id)">View</button>
+            <button type="button" (click)="editRecipe(recipe.id)">Edit</button>
             <button type="button" class="danger" (click)="deleteRecipe(recipe.id)">Delete</button>
           </div>
         </article>
       </section>
 
       <section class="card recipe-grid" *ngIf="activeTab === 'favourites'">
+        <article class="empty-state" *ngIf="!favouriteRecipes.length">
+          <h3>No favourites yet</h3>
+          <p>Save recipes you love and they will appear here.</p>
+        </article>
         <article class="recipe-card" *ngFor="let recipe of favouriteRecipes">
           <div class="recipe-cover">
             <img [src]="recipe.imageUrl" [alt]="recipe.title" />

@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ActivityItem, Profile, Recipe, SuggestedCook } from '../app-data.models';
 import { AppStorageService } from '../app-storage.service';
+import { AuthService } from '../auth.service';
 
 @Component({
   selector: 'app-profile',
@@ -9,20 +10,6 @@ import { AppStorageService } from '../app-storage.service';
   styleUrls: ['./profile.component.css']
 })
 export class ProfileComponent implements OnInit {
-  readonly profileRecipeIds = [
-    'pap-and-braai',
-    'pap-and-pork',
-    'beef-liver-stew',
-    'chips-and-ribs',
-    'pap-and-chicken-liver',
-    'jollof-rice-stew-platter',
-  ];
-  readonly profileFavouriteIds = [
-    'amas-and-phuthu',
-    'mogodu',
-    'jelly-custard-shots',
-    'samp-and-beans',
-  ];
   profile!: Profile;
   recipes: Recipe[] = [];
   activities: ActivityItem[] = [];
@@ -33,7 +20,8 @@ export class ProfileComponent implements OnInit {
 
   constructor(
     private readonly router: Router,
-    private readonly storage: AppStorageService
+    private readonly storage: AppStorageService,
+    private readonly auth: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -41,15 +29,20 @@ export class ProfileComponent implements OnInit {
   }
 
   get favouriteRecipes(): Recipe[] {
-    return this.recipes.filter((recipe) => this.profileFavouriteIds.includes(recipe.id));
+    return this.recipes.filter((recipe) => this.profile.favouriteRecipeIds.includes(recipe.id));
   }
 
   get myRecipes(): Recipe[] {
-    return this.recipes.filter((recipe) => this.profileRecipeIds.includes(recipe.id));
+    const currentUserId = this.auth.getCurrentUser()?.id;
+    if (!currentUserId) {
+      return [];
+    }
+
+    return this.recipes.filter((recipe) => recipe.ownerUserId === currentUserId);
   }
 
   get profileReviews(): Array<{ recipeTitle: string; review: Recipe['reviews'][number] }> {
-    return this.recipes.flatMap((recipe) =>
+    return this.myRecipes.flatMap((recipe) =>
       recipe.reviews.map((review) => ({
         recipeTitle: recipe.title,
         review,
@@ -80,6 +73,12 @@ export class ProfileComponent implements OnInit {
 
   openRecipe(recipeId: string): void {
     void this.router.navigate(['/recipes', recipeId]);
+  }
+
+  editRecipe(recipeId: string): void {
+    void this.router.navigate(['/upload'], {
+      queryParams: { edit: recipeId },
+    });
   }
 
   deleteRecipe(recipeId: string): void {

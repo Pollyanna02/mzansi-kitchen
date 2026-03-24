@@ -60,6 +60,10 @@ export class RecipeComponent implements OnInit, OnDestroy {
     return total / this.recipe.reviews.length;
   }
 
+  get hasRatings(): boolean {
+    return !!this.recipe?.reviews.length;
+  }
+
   get ratingBreakdown(): Array<{ stars: number; count: number; percent: number }> {
     if (!this.recipe) {
       return [];

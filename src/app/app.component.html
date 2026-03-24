@@ -8,7 +8,7 @@
       <a *ngIf="isAdmin" routerLink="/admin" routerLinkActive="active">Admin</a>
     </nav>
     <div class="auth-actions">
-      <span class="welcome">{{ displayName }}</span>
+      <span *ngIf="isAuthenticated" class="welcome">{{ displayName }}</span>
       <a *ngIf="!isAuthenticated" class="auth-link" routerLink="/login">Sign in</a>
       <button *ngIf="isAuthenticated" type="button" class="auth-link" (click)="logout()">Sign out</button>
       <a class="profile-chip" [routerLink]="isAuthenticated ? '/profile' : '/login'">{{ avatar }}</a>

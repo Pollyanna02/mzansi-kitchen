@@ -77,7 +77,6 @@ export class AuthService {
     name: string;
     email: string;
     password: string;
-    avatar: string;
     role: AuthRole;
   }): { ok: boolean; message?: string } {
     const email = payload.email.trim().toLowerCase();
@@ -90,7 +89,7 @@ export class AuthService {
       name: payload.name.trim(),
       email,
       password: payload.password,
-      avatar: (payload.avatar.trim().toUpperCase() || payload.name.slice(0, 2).toUpperCase()).slice(0, 2),
+      avatar: payload.name.trim().slice(0, 2).toUpperCase() || 'MK',
       role: payload.role,
     };
 

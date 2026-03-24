@@ -1,43 +1,37 @@
 <section class="auth-page">
   <div class="auth-card">
-    <div class="eyebrow">Authentication</div>
     <h1>{{ mode === 'login' ? 'Sign in to continue' : 'Create your account' }}</h1>
-    <p>Protected routes now require authentication, and admin access is role-based.</p>
 
     <div class="mode-tabs">
       <button type="button" [class.active]="mode === 'login'" (click)="switchMode('login')">Sign in</button>
       <button type="button" [class.active]="mode === 'register'" (click)="switchMode('register')">Register</button>
     </div>
 
-    <form *ngIf="mode === 'login'; else registerTemplate" class="auth-form" (ngSubmit)="submit()">
+    <form *ngIf="mode === 'login'; else registerTemplate" class="auth-form" autocomplete="off" (ngSubmit)="submit()">
       <label>
         Email
-        <input [(ngModel)]="loginForm.email" name="loginEmail" type="email" required />
+        <input [(ngModel)]="loginForm.email" name="loginEmail" type="email" autocomplete="off" autocapitalize="off" spellcheck="false" required />
       </label>
       <label>
         Password
-        <input [(ngModel)]="loginForm.password" name="loginPassword" type="password" required />
+        <input [(ngModel)]="loginForm.password" name="loginPassword" type="password" autocomplete="new-password" required />
       </label>
       <button type="submit" class="primary-btn">Sign in</button>
     </form>
 
     <ng-template #registerTemplate>
-      <form class="auth-form" (ngSubmit)="submit()">
+      <form class="auth-form" autocomplete="off" (ngSubmit)="submit()">
         <label>
           Name
-          <input [(ngModel)]="registerForm.name" name="registerName" required />
+          <input [(ngModel)]="registerForm.name" name="registerName" autocomplete="off" required />
         </label>
         <label>
           Email
-          <input [(ngModel)]="registerForm.email" name="registerEmail" type="email" required />
+          <input [(ngModel)]="registerForm.email" name="registerEmail" type="email" autocomplete="off" autocapitalize="off" spellcheck="false" required />
         </label>
         <label>
           Password
-          <input [(ngModel)]="registerForm.password" name="registerPassword" type="password" required />
-        </label>
-        <label>
-          Avatar
-          <input [(ngModel)]="registerForm.avatar" name="registerAvatar" maxlength="2" />
+          <input [(ngModel)]="registerForm.password" name="registerPassword" type="password" autocomplete="new-password" required />
         </label>
         <label>
           Role
@@ -51,11 +45,5 @@
     </ng-template>
 
     <p class="error" *ngIf="error">{{ error }}</p>
-
-    <div class="helper">
-      Demo accounts:
-      <span>`thandeka@mzansikitchen.local` / `Pass1234!`</span>
-      <span>`admin@mzansikitchen.local` / `Admin1234!`</span>
-    </div>
   </div>
 </section>

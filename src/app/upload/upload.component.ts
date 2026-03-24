@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { UploadDraft } from '../app-data.models';
 import { AppStorageService } from '../app-storage.service';
 
@@ -15,12 +15,22 @@ export class UploadComponent implements OnInit {
   successRecipeId?: string;
 
   constructor(
+    private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly storage: AppStorageService
   ) {}
 
   ngOnInit(): void {
-    this.draft = this.storage.getUploadDraft();
+    this.route.queryParamMap.subscribe((params) => {
+      this.successRecipeId = undefined;
+      const recipeId = params.get('edit');
+      if (recipeId) {
+        this.loadRecipeDraft(recipeId);
+        return;
+      }
+
+      this.draft = this.storage.getUploadDraft();
+    });
   }
 
   get completionStep(): number {
@@ -37,6 +47,10 @@ export class UploadComponent implements OnInit {
     }
 
     return 4;
+  }
+
+  get hasExistingRecipe(): boolean {
+    return !!this.draft?.recipeId;
   }
 
   addIngredient(): void {
@@ -105,6 +119,45 @@ export class UploadComponent implements OnInit {
     this.storage.resetDraft();
     this.draft = this.storage.getUploadDraft();
     this.successRecipeId = undefined;
+    void this.router.navigate(['/upload']);
+  }
+
+  editSubmittedRecipe(): void {
+    if (!this.successRecipeId) {
+      return;
+    }
+
+    const recipeId = this.successRecipeId;
+    this.successRecipeId = undefined;
+    this.loadRecipeDraft(recipeId);
+    void this.router.navigate(['/upload'], {
+      queryParams: { edit: recipeId },
+    });
+  }
+
+  backToMethod(): void {
+    document.getElementById('method-section')?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    });
+  }
+
+  deleteCurrentRecipe(): void {
+    const recipeId = this.successRecipeId ?? this.draft?.recipeId;
+    if (!recipeId) {
+      return;
+    }
+
+    const shouldDelete = window.confirm('Delete this recipe? This cannot be undone.');
+    if (!shouldDelete) {
+      return;
+    }
+
+    this.storage.deleteRecipe(recipeId);
+    this.successRecipeId = undefined;
+    this.storage.resetDraft();
+    this.draft = this.storage.getUploadDraft();
+    void this.router.navigate(['/profile']);
   }
 
   async onFilesSelected(event: Event): Promise<void> {
@@ -143,6 +196,10 @@ export class UploadComponent implements OnInit {
     return this.draft.dietaryTags.includes(tag);
   }
 
+  trackByIndex(index: number): number {
+    return index;
+  }
+
   previewEmoji(): string {
     const emojiMap: Record<string, string> = {
       Braai: '🔥',
@@ -161,6 +218,11 @@ export class UploadComponent implements OnInit {
 
   totalMinutes(): number {
     return (this.draft.prepMinutes ?? 0) + (this.draft.cookMinutes ?? 0);
+  }
+
+  private loadRecipeDraft(recipeId: string): void {
+    this.draft = this.storage.loadDraftFromRecipe(recipeId) ?? this.storage.getUploadDraft();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   private persistDraft(): void {

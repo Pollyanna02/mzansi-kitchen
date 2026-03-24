@@ -29,6 +29,7 @@ export interface Recipe {
   category: string;
   emoji: string;
   imageUrl?: string;
+  ownerUserId?: string;
   prepMinutes: number;
   cookMinutes: number;
   servings: number;

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthRole } from '../app-data.models';
 import { AuthService } from '../auth.service';
@@ -8,23 +8,21 @@ import { AuthService } from '../auth.service';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   mode: 'login' | 'register' = 'login';
   loginForm = {
-    email: 'thandeka@mzansikitchen.local',
-    password: 'Pass1234!',
+    email: '',
+    password: '',
   };
   registerForm: {
     name: string;
     email: string;
     password: string;
-    avatar: string;
     role: AuthRole;
   } = {
     name: '',
     email: '',
     password: '',
-    avatar: '',
     role: 'contributor',
   };
   error = '';
@@ -35,9 +33,14 @@ export class LoginComponent {
     private readonly router: Router
   ) {}
 
+  ngOnInit(): void {
+    this.resetForms();
+  }
+
   switchMode(mode: 'login' | 'register'): void {
     this.mode = mode;
     this.error = '';
+    this.resetForms();
   }
 
   submit(): void {
@@ -53,5 +56,18 @@ export class LoginComponent {
 
     const redirectTo = this.route.snapshot.queryParamMap.get('redirectTo') ?? '/profile';
     void this.router.navigateByUrl(redirectTo);
+  }
+
+  private resetForms(): void {
+    this.loginForm = {
+      email: '',
+      password: '',
+    };
+    this.registerForm = {
+      name: '',
+      email: '',
+      password: '',
+      role: 'contributor',
+    };
   }
 }

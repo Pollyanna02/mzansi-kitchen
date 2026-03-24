@@ -2,7 +2,7 @@
   <div class="page-header">
     <span class="eyebrow">Share with Mzansi</span>
     <h1>Upload Your Recipe</h1>
-    <p>Every field now saves through localStorage, so drafts, edits, and published recipes stay with the app.</p>
+    <p>Add your recipe title, picture, ingredients, and step-by-step instructions. Every field saves through localStorage while you work.</p>
     <div class="progress">
       <div class="progress-step" [class.active]="completionStep >= 1">1. Basic Info</div>
       <div class="progress-step" [class.active]="completionStep >= 2">2. Ingredients</div>
@@ -84,7 +84,15 @@
         </div>
         <div class="field">
           <label>Recipe Photos</label>
-          <input type="file" accept="image/*" multiple (change)="onFilesSelected($event)" />
+          <input
+            #fileUploadInput
+            class="file-input"
+            type="file"
+            accept="image/*"
+            multiple
+            (change)="onFilesSelected($event)"
+          />
+          <button type="button" class="file-trigger" (click)="fileUploadInput.click()">Choose photos</button>
           <div class="image-grid" *ngIf="draft.imagePreviews.length">
             <div class="image-card" *ngFor="let image of draft.imagePreviews; let index = index">
               <img [src]="image" alt="Recipe preview" />
@@ -99,7 +107,7 @@
           <h2>Ingredients</h2>
           <button type="button" (click)="addIngredient()">Add ingredient</button>
         </div>
-        <div class="ingredient-row" *ngFor="let ingredient of draft.ingredients; let index = index">
+        <div class="ingredient-row" *ngFor="let ingredient of draft.ingredients; let index = index; trackBy: trackByIndex">
           <input [(ngModel)]="ingredient.amount" (ngModelChange)="onFieldChange()" placeholder="2" />
           <input [(ngModel)]="ingredient.unit" (ngModelChange)="onFieldChange()" placeholder="cups" />
           <input [(ngModel)]="ingredient.name" (ngModelChange)="onFieldChange()" placeholder="white maize meal" />
@@ -107,12 +115,12 @@
         </div>
       </section>
 
-      <section class="card">
+      <section class="card" id="method-section">
         <div class="section-head">
           <h2>Method</h2>
           <button type="button" (click)="addStep()">Add step</button>
         </div>
-        <div class="step-row" *ngFor="let step of draft.steps; let index = index">
+        <div class="step-row" *ngFor="let step of draft.steps; let index = index; trackBy: trackByIndex">
           <div class="step-num">{{ index + 1 }}</div>
           <textarea [(ngModel)]="draft.steps[index]" (ngModelChange)="onFieldChange()" rows="3" placeholder="Explain this step clearly"></textarea>
           <button type="button" (click)="removeStep(index)">x</button>
@@ -123,6 +131,8 @@
         <h2>Review & Submit</h2>
         <p class="notice">Saving a draft updates localStorage immediately, and publishing adds the recipe to the rest of the app.</p>
         <div class="submit-row">
+          <button type="button" class="danger-btn" *ngIf="hasExistingRecipe" (click)="deleteCurrentRecipe()">Delete recipe</button>
+          <button type="button" (click)="backToMethod()">Back to method</button>
           <button type="button" (click)="saveDraft()">Save as draft</button>
           <button type="button" class="primary-btn" (click)="publishRecipe()">Publish recipe</button>
         </div>
@@ -165,6 +175,8 @@
       <p>Your recipe is now part of the app state and available on the recipe and profile screens.</p>
       <div class="submit-row">
         <button type="button" class="primary-btn" (click)="viewRecipe()">View recipe</button>
+        <button type="button" (click)="editSubmittedRecipe()">Edit recipe</button>
+        <button type="button" class="danger-btn" (click)="deleteCurrentRecipe()">Delete recipe</button>
         <button type="button" (click)="startNewRecipe()">Start another</button>
       </div>
     </div>

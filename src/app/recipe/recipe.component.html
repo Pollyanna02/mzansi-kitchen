@@ -13,7 +13,7 @@
         <span>{{ current.category }}</span>
         <span>{{ current.prepMinutes + current.cookMinutes }} min</span>
         <span>{{ current.servings }} servings</span>
-        <span>{{ averageRating | number:'1.1-1' }} ★</span>
+        <span *ngIf="hasRatings">{{ averageRating | number:'1.1-1' }} ★</span>
       </div>
     </div>
   </div>
@@ -65,10 +65,10 @@
             <h2>Ratings & Reviews</h2>
             <p>{{ current.reviews.length }} reviews</p>
           </div>
-          <div class="rating-value">{{ averageRating | number:'1.1-1' }}</div>
+          <div *ngIf="hasRatings" class="rating-value">{{ averageRating | number:'1.1-1' }}</div>
         </div>
 
-        <div class="rating-bars">
+        <div *ngIf="hasRatings" class="rating-bars">
           <div class="rating-row" *ngFor="let item of ratingBreakdown">
             <span>{{ item.stars }}</span>
             <div class="rating-track">

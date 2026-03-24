@@ -26,7 +26,7 @@ export class AppComponent {
   }
 
   get canUpload(): boolean {
-    return this.auth.hasRole('contributor');
+    return this.auth.isAuthenticated();
   }
 
   get displayName(): string {

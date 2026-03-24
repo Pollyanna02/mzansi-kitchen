@@ -9,8 +9,10 @@ import {
   SuggestedCook,
   UploadDraft,
 } from './app-data.models';
+import { AuthService } from './auth.service';
 
 const STORAGE_KEY = 'mzansi-kitchen-state';
+const PROFILES_KEY = 'mzansi-kitchen-profiles';
 
 const defaultState: AppState = {
   profile: {
@@ -41,6 +43,7 @@ const defaultState: AppState = {
       category: 'Pap',
       emoji: '🌽',
       imageUrl: 'assets/Pap-and-Wors.png',
+      ownerUserId: 'user-thandeka',
       prepMinutes: 10,
       cookMinutes: 25,
       servings: 4,
@@ -125,6 +128,7 @@ const defaultState: AppState = {
       category: 'Braai',
       emoji: '🥩',
       imageUrl: 'assets/braai meat.webp',
+      ownerUserId: 'user-thandeka',
       prepMinutes: 5,
       cookMinutes: 20,
       servings: 4,
@@ -160,6 +164,7 @@ const defaultState: AppState = {
       category: 'Potjiekos',
       emoji: '🥘',
       imageUrl: 'assets/portjie kos.jpeg',
+      ownerUserId: 'user-thandeka',
       prepMinutes: 30,
       cookMinutes: 180,
       servings: 6,
@@ -184,6 +189,7 @@ const defaultState: AppState = {
       category: 'Desserts',
       emoji: '🥧',
       imageUrl: 'assets/malva pudding.jpg',
+      ownerUserId: 'user-thandeka',
       prepMinutes: 15,
       cookMinutes: 40,
       servings: 8,
@@ -464,6 +470,7 @@ const defaultState: AppState = {
       category: 'Braai',
       emoji: '🔥',
       imageUrl: 'assets/pap and braai.jpg',
+      ownerUserId: 'user-thandeka',
       prepMinutes: 15,
       cookMinutes: 35,
       servings: 4,
@@ -492,6 +499,7 @@ const defaultState: AppState = {
       category: 'Pap',
       emoji: '🍖',
       imageUrl: 'assets/pap and pork.jpeg',
+      ownerUserId: 'user-thandeka',
       prepMinutes: 20,
       cookMinutes: 60,
       servings: 5,
@@ -520,6 +528,7 @@ const defaultState: AppState = {
       category: 'Stews',
       emoji: '🥘',
       imageUrl: 'assets/beef liver.jpeg',
+      ownerUserId: 'user-thandeka',
       prepMinutes: 15,
       cookMinutes: 25,
       servings: 4,
@@ -548,6 +557,7 @@ const defaultState: AppState = {
       category: 'Street Food',
       emoji: '🍟',
       imageUrl: 'assets/chips and ribs.jpg',
+      ownerUserId: 'user-thandeka',
       prepMinutes: 20,
       cookMinutes: 50,
       servings: 4,
@@ -576,6 +586,7 @@ const defaultState: AppState = {
       category: 'Pap',
       emoji: '🍗',
       imageUrl: 'assets/pap and chicken liver.webp',
+      ownerUserId: 'user-thandeka',
       prepMinutes: 15,
       cookMinutes: 25,
       servings: 4,
@@ -604,6 +615,7 @@ const defaultState: AppState = {
       category: 'Rice',
       emoji: '🍚',
       imageUrl: 'assets/jallof rice with stew.jpeg',
+      ownerUserId: 'user-thandeka',
       prepMinutes: 20,
       cookMinutes: 55,
       servings: 6,
@@ -717,9 +729,12 @@ const defaultState: AppState = {
 @Injectable({ providedIn: 'root' })
 export class AppStorageService {
   private state = this.loadState();
+  private profilesByUserId = this.loadProfiles();
+
+  constructor(private readonly auth: AuthService) {}
 
   getProfile(): Profile {
-    return structuredClone(this.state.profile);
+    return structuredClone(this.getActiveProfile());
   }
 
   getRecipes(): Recipe[] {
@@ -738,6 +753,34 @@ export class AppStorageService {
     return structuredClone(this.state.uploadDraft);
   }
 
+  loadDraftFromRecipe(recipeId: string): UploadDraft | null {
+    const recipe = this.state.recipes.find((item) => item.id === recipeId);
+    if (!recipe) {
+      return null;
+    }
+
+    const draft: UploadDraft = {
+      recipeId: recipe.id,
+      title: recipe.title,
+      description: recipe.description,
+      category: recipe.category,
+      prepMinutes: recipe.prepMinutes,
+      cookMinutes: recipe.cookMinutes,
+      servings: recipe.servings,
+      difficulty: recipe.difficulty,
+      spiceLevel: recipe.spiceLevel,
+      dietaryTags: recipe.tags.filter((tag) => tag !== recipe.category),
+      ingredients: structuredClone(recipe.ingredients),
+      steps: recipe.steps.map((step) => step.text),
+      imagePreviews: recipe.imageUrl ? [recipe.imageUrl] : [],
+      status: recipe.status,
+    };
+
+    this.state.uploadDraft = structuredClone(draft);
+    this.saveState();
+    return draft;
+  }
+
   getActivities(): ActivityItem[] {
     return structuredClone(this.state.activities);
   }
@@ -747,12 +790,20 @@ export class AppStorageService {
   }
 
   updateProfile(profile: Profile): void {
-    this.state.profile = structuredClone(profile);
-    this.saveState();
+    const user = this.auth.getCurrentUser();
+    if (!user) {
+      this.state.profile = structuredClone(profile);
+      this.saveState();
+      return;
+    }
+
+    this.profilesByUserId[user.id] = structuredClone(profile);
+    this.saveProfiles();
   }
 
   toggleFavourite(recipeId: string): void {
-    const favourites = new Set(this.state.profile.favouriteRecipeIds);
+    const profile = this.getActiveProfile();
+    const favourites = new Set(profile.favouriteRecipeIds);
     const recipe = this.state.recipes.find((item) => item.id === recipeId);
     if (!recipe) {
       return;
@@ -766,22 +817,23 @@ export class AppStorageService {
       recipe.savedCount += 1;
     }
 
-    this.state.profile.favouriteRecipeIds = Array.from(favourites);
-    this.saveState();
+    profile.favouriteRecipeIds = Array.from(favourites);
+    this.persistActiveProfile(profile);
   }
 
   toggleCookFollow(cookId: string): void {
-    const following = new Set(this.state.profile.followingCookIds);
+    const profile = this.getActiveProfile();
+    const following = new Set(profile.followingCookIds);
     if (following.has(cookId)) {
       following.delete(cookId);
-      this.state.profile.following = Math.max(0, this.state.profile.following - 1);
+      profile.following = Math.max(0, profile.following - 1);
     } else {
       following.add(cookId);
-      this.state.profile.following += 1;
+      profile.following += 1;
     }
 
-    this.state.profile.followingCookIds = Array.from(following);
-    this.saveState();
+    profile.followingCookIds = Array.from(following);
+    this.persistActiveProfile(profile);
   }
 
   addReview(recipeId: string, rating: number, comment: string): void {
@@ -789,11 +841,12 @@ export class AppStorageService {
     if (!recipe) {
       return;
     }
+    const profile = this.getActiveProfile();
 
     const review: RecipeReview = {
       id: `rev-${Date.now()}`,
-      author: this.state.profile.name,
-      avatar: this.state.profile.avatar,
+      author: profile.name,
+      avatar: profile.avatar,
       rating,
       comment,
       createdAt: 'Just now',
@@ -811,7 +864,9 @@ export class AppStorageService {
 
   deleteRecipe(recipeId: string): void {
     this.state.recipes = this.state.recipes.filter((recipe) => recipe.id !== recipeId);
-    this.state.profile.favouriteRecipeIds = this.state.profile.favouriteRecipeIds.filter((id) => id !== recipeId);
+    const profile = this.getActiveProfile();
+    profile.favouriteRecipeIds = profile.favouriteRecipeIds.filter((id) => id !== recipeId);
+    this.persistActiveProfile(profile);
     this.saveState();
   }
 
@@ -878,6 +933,7 @@ export class AppStorageService {
       category: draft.category || 'Community',
       emoji: this.resolveRecipeEmoji(draft.category),
       imageUrl: existing?.imageUrl || draft.imagePreviews[0] || '',
+      ownerUserId: existing?.ownerUserId || this.auth.getCurrentUser()?.id,
       prepMinutes: draft.prepMinutes ?? 0,
       cookMinutes: draft.cookMinutes ?? 0,
       servings: draft.servings ?? 1,
@@ -966,6 +1022,91 @@ export class AppStorageService {
     }
 
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state));
+  }
+
+  private getActiveProfile(): Profile {
+    const user = this.auth.getCurrentUser();
+    if (!user) {
+      return structuredClone(this.state.profile);
+    }
+
+    const existing = this.profilesByUserId[user.id];
+    if (existing) {
+      return existing;
+    }
+
+    const createdProfile = this.buildProfileForUser(user.id, user.name, user.avatar);
+    this.profilesByUserId[user.id] = createdProfile;
+    this.saveProfiles();
+    return createdProfile;
+  }
+
+  private persistActiveProfile(profile: Profile): void {
+    const user = this.auth.getCurrentUser();
+    if (!user) {
+      this.state.profile = structuredClone(profile);
+      this.saveState();
+      return;
+    }
+
+    this.profilesByUserId[user.id] = structuredClone(profile);
+    this.saveProfiles();
+  }
+
+  private loadProfiles(): Record<string, Profile> {
+    const defaultProfiles: Record<string, Profile> = {
+      'user-thandeka': structuredClone(defaultState.profile),
+      'user-admin': this.buildProfileForUser('user-admin', 'Admin Nkosi', 'AN'),
+    };
+
+    if (typeof window === 'undefined' || !window.localStorage) {
+      return defaultProfiles;
+    }
+
+    const stored = window.localStorage.getItem(PROFILES_KEY);
+    if (!stored) {
+      window.localStorage.setItem(PROFILES_KEY, JSON.stringify(defaultProfiles));
+      return defaultProfiles;
+    }
+
+    try {
+      const parsed = JSON.parse(stored) as Record<string, Profile>;
+      return { ...defaultProfiles, ...parsed };
+    } catch {
+      return defaultProfiles;
+    }
+  }
+
+  private saveProfiles(): void {
+    if (typeof window === 'undefined' || !window.localStorage) {
+      return;
+    }
+
+    window.localStorage.setItem(PROFILES_KEY, JSON.stringify(this.profilesByUserId));
+  }
+
+  private buildProfileForUser(_userId: string, name: string, avatar: string): Profile {
+    const handleSource = name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '.').replace(/(^\.|\.$)/g, '');
+    return {
+      name,
+      handle: `@${handleSource || 'new.user'}`,
+      location: 'Add your location',
+      bio: 'Tell the Mzansi Kitchen community a little about how you cook.',
+      avatar,
+      verified: false,
+      followers: 0,
+      following: 0,
+      favouriteRecipeIds: [],
+      followingCookIds: [],
+      achievements: [
+        { label: 'Home Chef', icon: '👨‍🍳', unlocked: true },
+        { label: 'Braai Master', icon: '🔥', unlocked: false },
+        { label: 'Top Rated', icon: '⭐', unlocked: false },
+        { label: 'Contributor', icon: '📤', unlocked: false },
+        { label: 'Legend', icon: '👑', unlocked: false },
+        { label: '100 Recipes', icon: '💯', unlocked: false },
+      ],
+    };
   }
 
   private mergeRecipes(storedRecipes: Recipe[]): Recipe[] {
