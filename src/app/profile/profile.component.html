@@ -1,0 +1,154 @@
+<section class="profile-page" *ngIf="profile">
+  <div class="profile-hero">
+    <div class="profile-avatar">{{ profile.avatar }}</div>
+    <div class="profile-copy">
+      <div class="eyebrow">{{ profile.handle }} · {{ profile.location }}</div>
+      <h1>
+        {{ profile.name }}
+        <span *ngIf="profile.verified">Verified</span>
+      </h1>
+      <p>{{ profile.bio }}</p>
+    </div>
+    <div class="profile-actions">
+      <button type="button" (click)="toggleEditProfile()">{{ editingProfile ? 'Cancel' : 'Edit profile' }}</button>
+      <a routerLink="/upload" class="primary-btn">Upload recipe</a>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <article class="stat-card">
+      <strong>{{ myRecipes.length }}</strong>
+      <span>Recipes</span>
+    </article>
+    <article class="stat-card">
+      <strong>{{ favouriteRecipes.length }}</strong>
+      <span>Favourites</span>
+    </article>
+    <article class="stat-card">
+      <strong>{{ statValue(profile.followers) }}</strong>
+      <span>Followers</span>
+    </article>
+    <article class="stat-card">
+      <strong>{{ profile.following }}</strong>
+      <span>Following</span>
+    </article>
+    <article class="stat-card">
+      <strong>{{ averageRating | number:'1.1-1' }}</strong>
+      <span>Avg rating</span>
+    </article>
+  </div>
+
+  <section class="card" *ngIf="editingProfile">
+    <h2>Edit profile</h2>
+    <div class="edit-grid">
+      <label>
+        Name
+        <input [(ngModel)]="editModel.name" />
+      </label>
+      <label>
+        Handle
+        <input [(ngModel)]="editModel.handle" />
+      </label>
+      <label>
+        Location
+        <input [(ngModel)]="editModel.location" />
+      </label>
+      <label>
+        Avatar
+        <input [(ngModel)]="editModel.avatar" maxlength="2" />
+      </label>
+      <label class="full-width">
+        Bio
+        <textarea [(ngModel)]="editModel.bio" rows="3"></textarea>
+      </label>
+    </div>
+    <button type="button" class="primary-btn" (click)="saveProfile()">Save changes</button>
+  </section>
+
+  <div class="profile-layout">
+    <div class="main-column">
+      <div class="tabs">
+        <button type="button" [class.active]="activeTab === 'recipes'" (click)="setTab('recipes')">My recipes</button>
+        <button type="button" [class.active]="activeTab === 'favourites'" (click)="setTab('favourites')">Favourites</button>
+        <button type="button" [class.active]="activeTab === 'activity'" (click)="setTab('activity')">Activity</button>
+        <button type="button" [class.active]="activeTab === 'reviews'" (click)="setTab('reviews')">Reviews</button>
+      </div>
+
+      <section class="card recipe-grid" *ngIf="activeTab === 'recipes'">
+        <article class="recipe-card" *ngFor="let recipe of myRecipes">
+          <div class="recipe-cover">
+            <img [src]="recipe.imageUrl" [alt]="recipe.title" />
+          </div>
+          <div>
+            <h3>{{ recipe.title }}</h3>
+            <p>{{ recipe.prepMinutes + recipe.cookMinutes }} min · {{ recipe.savedCount }} saves</p>
+          </div>
+          <div class="card-actions">
+            <button type="button" (click)="openRecipe(recipe.id)">View</button>
+            <button type="button" class="danger" (click)="deleteRecipe(recipe.id)">Delete</button>
+          </div>
+        </article>
+      </section>
+
+      <section class="card recipe-grid" *ngIf="activeTab === 'favourites'">
+        <article class="recipe-card" *ngFor="let recipe of favouriteRecipes">
+          <div class="recipe-cover">
+            <img [src]="recipe.imageUrl" [alt]="recipe.title" />
+          </div>
+          <div>
+            <h3>{{ recipe.title }}</h3>
+            <p>{{ recipe.description }}</p>
+          </div>
+          <button type="button" (click)="openRecipe(recipe.id)">Open recipe</button>
+        </article>
+      </section>
+
+      <section class="card activity-list" *ngIf="activeTab === 'activity'">
+        <article class="activity-item" *ngFor="let item of activities">
+          <div class="activity-icon">{{ item.icon }}</div>
+          <div>
+            <p>{{ item.text }}</p>
+            <small>{{ item.timeAgo }}</small>
+          </div>
+        </article>
+      </section>
+
+      <section class="card review-list" *ngIf="activeTab === 'reviews'">
+        <article class="review-card" *ngFor="let item of profileReviews">
+          <div class="review-meta">
+            <strong>{{ item.review.author }}</strong>
+            <span>{{ item.recipeTitle }} · {{ item.review.createdAt }}</span>
+            <span class="stars">{{ reviewStars(item.review.rating) }}</span>
+          </div>
+          <p>{{ item.review.comment }}</p>
+        </article>
+      </section>
+    </div>
+
+    <aside class="side-column">
+      <section class="card">
+        <h2>Achievements</h2>
+        <div class="achievement-grid">
+          <article class="achievement" *ngFor="let achievement of profile.achievements" [class.locked]="!achievement.unlocked">
+            <span>{{ achievement.icon }}</span>
+            <small>{{ achievement.label }}</small>
+          </article>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Top Mzansi cooks</h2>
+        <article class="cook-card" *ngFor="let cook of suggestedCooks">
+          <div class="cook-avatar">{{ cook.avatar }}</div>
+          <div>
+            <strong>{{ cook.name }}</strong>
+            <p>{{ cook.recipes }} recipes · {{ cook.location }}</p>
+          </div>
+          <button type="button" (click)="toggleCookFollow(cook.id)">
+            {{ isFollowingCook(cook.id) ? 'Following' : 'Follow' }}
+          </button>
+        </article>
+      </section>
+    </aside>
+  </div>
+</section>

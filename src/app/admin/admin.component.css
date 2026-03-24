@@ -1,0 +1,54 @@
+.admin-page,
+.user-grid {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.hero,
+.card,
+.user-card {
+  background: var(--warm-white);
+  border: 1px solid var(--border);
+  border-radius: 1.5rem;
+}
+
+.hero,
+.card {
+  padding: 1.5rem;
+}
+
+.eyebrow,
+.hero p,
+.user-card p,
+.user-card small {
+  color: var(--text-light);
+}
+
+.hero h1,
+.card h2 {
+  margin: .35rem 0;
+  font-family: var(--font-display);
+}
+
+.user-grid {
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+}
+
+.user-card {
+  display: grid;
+  grid-template-columns: 3rem 1fr;
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem;
+}
+
+.avatar {
+  width: 3rem;
+  height: 3rem;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--brown);
+  color: #fff;
+  font-weight: 700;
+}

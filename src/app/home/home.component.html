@@ -1,0 +1,66 @@
+<section class="home-page">
+  <div class="hero" *ngIf="featuredRecipe as featured">
+    <div class="hero-copy">
+      <div class="eyebrow">African Kitchen Favourites</div>
+      <h1>Choose a recipe from across the continent</h1>
+      <p>
+        Browse comforting classics, braai staples, rich stews, and sweet treats from different African food traditions.
+      </p>
+      <div class="hero-meta">
+        <span>{{ recipes.length }} recipes</span>
+        <span>{{ categories.length - 1 }} categories</span>
+        <span>Fresh localStorage-backed picks</span>
+      </div>
+      <div class="hero-actions">
+        <a class="primary-btn" href="#recipes">Show recipes</a>
+        <button type="button" class="secondary-btn" (click)="openRecipe(featured.id)">Cook {{ featured.title }}</button>
+      </div>
+    </div>
+    <button
+      type="button"
+      class="feature-card"
+      (click)="openRecipe(featured.id)"
+    >
+      <img class="feature-image" [src]="featured.imageUrl" [alt]="featured.title" />
+      <div class="feature-content">
+        <span>{{ featured.category }}</span>
+        <strong>{{ featured.title }}</strong>
+        <small>{{ featured.prepMinutes + featured.cookMinutes }} min · {{ featured.savedCount }} saves</small>
+      </div>
+    </button>
+  </div>
+
+  <section class="category-strip">
+    <button
+      *ngFor="let category of categories"
+      type="button"
+      [class.active]="activeCategory === category"
+      (click)="setCategory(category)"
+    >
+      {{ category }}
+    </button>
+  </section>
+
+  <section id="recipes" class="recipe-grid">
+    <article
+      class="recipe-card"
+      *ngFor="let recipe of filteredRecipes; trackBy: trackRecipe"
+      (click)="openRecipe(recipe.id)"
+    >
+      <img class="recipe-cover" [src]="recipe.imageUrl" [alt]="recipe.title" />
+      <div class="recipe-copy">
+        <div class="recipe-topline">
+          <span>{{ recipe.category }}</span>
+          <span>{{ recipe.difficulty }}</span>
+        </div>
+        <h2>{{ recipe.title }}</h2>
+        <p>{{ recipe.description }}</p>
+        <div class="recipe-meta">
+          <span>{{ recipe.prepMinutes + recipe.cookMinutes }} min</span>
+          <span>{{ recipe.servings }} servings</span>
+          <span>{{ recipe.savedCount }} saves</span>
+        </div>
+      </div>
+    </article>
+  </section>
+</section>

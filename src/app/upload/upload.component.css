@@ -1,0 +1,250 @@
+.upload-page,
+.upload-layout,
+.field,
+.image-grid {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.page-header,
+.card,
+.image-card,
+.success-box {
+  background: var(--warm-white);
+  border: 1px solid var(--border);
+  border-radius: 1.5rem;
+}
+
+.page-header {
+  padding: 2rem;
+  background: linear-gradient(135deg, var(--brown), #8f4c14);
+  color: #fff;
+}
+
+.eyebrow {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.page-header h1,
+.card h2,
+.preview-copy h3,
+.success-box h2 {
+  margin: 0.5rem 0;
+  font-family: var(--font-display);
+}
+
+.page-header p {
+  max-width: 42rem;
+  margin: 0 0 1rem;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.progress,
+.pill-row,
+.submit-row,
+.section-head,
+.preview-meta {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.progress-step,
+.pill-row button,
+.section-head button,
+.submit-row button,
+.image-card button,
+.ingredient-row button,
+.step-row button {
+  border: 1px solid var(--border);
+  background: #fff;
+  border-radius: 999px;
+  color: var(--text-mid);
+  cursor: pointer;
+  padding: 0.7rem 1rem;
+}
+
+.progress-step {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.progress-step.active {
+  background: var(--amber);
+  border-color: var(--amber);
+  color: var(--brown-dark);
+}
+
+.upload-layout {
+  grid-template-columns: minmax(0, 1fr) 21rem;
+}
+
+.main-column,
+.side-column {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.card {
+  padding: 1.5rem;
+}
+
+.field label,
+.field-grid label {
+  display: grid;
+  gap: 0.45rem;
+  color: var(--text-mid);
+}
+
+.field input,
+.field textarea,
+.field select,
+.field-grid input,
+.field-grid select,
+.ingredient-row input,
+.step-row textarea {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--cream);
+}
+
+.field-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.field-grid-two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.pill-row button.active,
+.primary-btn {
+  background: var(--brown) !important;
+  border-color: var(--brown) !important;
+  color: #fff !important;
+}
+
+.image-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.image-card {
+  overflow: hidden;
+}
+
+.image-card img,
+.preview-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.image-card button {
+  width: calc(100% - 1rem);
+  margin: 0.5rem;
+}
+
+.section-head {
+  justify-content: space-between;
+}
+
+.ingredient-row,
+.step-row {
+  display: grid;
+  gap: 0.75rem;
+  align-items: start;
+  margin-top: 1rem;
+}
+
+.ingredient-row {
+  grid-template-columns: 5rem 6rem 1fr auto;
+}
+
+.step-row {
+  grid-template-columns: 2.5rem 1fr auto;
+}
+
+.step-num,
+.preview-emoji {
+  display: grid;
+  place-items: center;
+  border-radius: 1rem;
+  background: var(--off-white);
+  color: var(--brown);
+}
+
+.step-num {
+  min-height: 3rem;
+  font-weight: 700;
+}
+
+.preview-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.preview-image,
+.preview-emoji {
+  min-height: 13rem;
+}
+
+.preview-emoji {
+  font-size: 4rem;
+  background: linear-gradient(145deg, #f5c842, #e8a020);
+}
+
+.preview-copy {
+  padding: 1.25rem;
+}
+
+.preview-copy span,
+.preview-copy p,
+.notice,
+ul {
+  color: var(--text-mid);
+}
+
+.preview-copy p,
+.notice {
+  line-height: 1.6;
+}
+
+.success-overlay {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(42, 26, 10, 0.6);
+  backdrop-filter: blur(3px);
+  padding: 1rem;
+}
+
+.success-box {
+  max-width: 28rem;
+  padding: 2rem;
+}
+
+@media (max-width: 960px) {
+  .upload-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .field-grid,
+  .field-grid-two,
+  .image-grid,
+  .ingredient-row,
+  .step-row {
+    grid-template-columns: 1fr;
+  }
+}

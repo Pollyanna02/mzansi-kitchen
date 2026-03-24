@@ -1,0 +1,100 @@
+.shell {
+  min-height: 100vh;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  background: rgba(250, 247, 242, 0.94);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+}
+
+.brand {
+  color: var(--brown);
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.brand span {
+  color: var(--amber);
+}
+
+.nav-links {
+  display: flex;
+  gap: 1.25rem;
+}
+
+.auth-actions {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+}
+
+.nav-links a {
+  color: var(--text-mid);
+  font-size: 0.95rem;
+  text-decoration: none;
+}
+
+.welcome {
+  color: var(--text-light);
+  font-size: .92rem;
+}
+
+.auth-link {
+  border: 1px solid var(--border);
+  background: #fff;
+  border-radius: 999px;
+  color: var(--text-mid);
+  cursor: pointer;
+  font-size: .92rem;
+  padding: .55rem .9rem;
+  text-decoration: none;
+}
+
+.nav-links a.active {
+  color: var(--brown);
+  font-weight: 700;
+}
+
+.profile-chip {
+  width: 2.5rem;
+  height: 2.5rem;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--brown);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.page-shell {
+  padding: 1.5rem;
+}
+
+@media (max-width: 720px) {
+  .topbar {
+    flex-wrap: wrap;
+  }
+
+  .nav-links {
+    order: 3;
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .auth-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}

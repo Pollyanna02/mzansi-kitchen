@@ -1,0 +1,156 @@
+<section class="recipe-page" *ngIf="recipe as current">
+  <div class="hero" [style.background]="'linear-gradient(145deg,' + current.imageGradient[0] + ',' + current.imageGradient[1] + ')'">
+    <img *ngIf="current.imageUrl" class="hero-image" [src]="current.imageUrl" [alt]="current.title" />
+    <div class="hero-copy">
+      <div class="breadcrumbs">
+        <a [routerLink]="['/recipes', storage.getFeaturedRecipeId()]">Recipes</a>
+        <span>/</span>
+        <span>{{ current.category }}</span>
+      </div>
+      <h1>{{ current.title }}</h1>
+      <p>{{ current.description }}</p>
+      <div class="hero-meta">
+        <span>{{ current.category }}</span>
+        <span>{{ current.prepMinutes + current.cookMinutes }} min</span>
+        <span>{{ current.servings }} servings</span>
+        <span>{{ averageRating | number:'1.1-1' }} ★</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="action-bar">
+    <div class="meta-list">
+      <span>Prep {{ current.prepMinutes }} min</span>
+      <span>Cook {{ current.cookMinutes }} min</span>
+      <span>{{ current.difficulty }}</span>
+      <span>{{ current.spiceLevel }}</span>
+    </div>
+    <div class="actions">
+      <button type="button" (click)="toggleFavourite()">{{ isFavourite ? 'Saved' : 'Save recipe' }}</button>
+      <button type="button" (click)="shareRecipe()">Share</button>
+      <button type="button" (click)="printRecipe()">Print</button>
+      <a *ngIf="canUpload" class="primary-btn" routerLink="/upload">Upload your own</a>
+      <a *ngIf="!isAuthenticated" class="primary-btn" [routerLink]="['/login']" [queryParams]="{ redirectTo: '/recipes/' + current.id }">
+        Sign in to save
+      </a>
+    </div>
+  </div>
+
+  <div class="content-grid">
+    <div class="main-column">
+      <section class="card">
+        <h2>Method</h2>
+        <div class="steps">
+          <article class="step" *ngFor="let step of current.steps; let index = index">
+            <div class="step-number">{{ index + 1 }}</div>
+            <div>
+              <h3>{{ step.title }}</h3>
+              <p>{{ step.text }}</p>
+              <small *ngIf="step.tip">{{ step.tip }}</small>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Tags</h2>
+        <div class="tag-list">
+          <span class="tag" *ngFor="let tag of current.tags">{{ tag }}</span>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="reviews-header">
+          <div>
+            <h2>Ratings & Reviews</h2>
+            <p>{{ current.reviews.length }} reviews</p>
+          </div>
+          <div class="rating-value">{{ averageRating | number:'1.1-1' }}</div>
+        </div>
+
+        <div class="rating-bars">
+          <div class="rating-row" *ngFor="let item of ratingBreakdown">
+            <span>{{ item.stars }}</span>
+            <div class="rating-track">
+              <div class="rating-fill" [style.width.%]="item.percent"></div>
+            </div>
+            <span>{{ item.count }}</span>
+          </div>
+        </div>
+
+        <div class="review-form">
+          <h3>Leave a review</h3>
+          <p *ngIf="!isAuthenticated" class="auth-note">Sign in to post a review or save this recipe.</p>
+          <div class="star-picker">
+            <button
+              *ngFor="let star of [1, 2, 3, 4, 5]"
+              type="button"
+              [class.active]="star <= reviewRating"
+              (click)="setReviewRating(star)"
+            >
+              ★
+            </button>
+          </div>
+          <textarea [(ngModel)]="reviewComment" rows="4" placeholder="Share your experience cooking this recipe" [disabled]="!isAuthenticated"></textarea>
+          <button type="button" class="primary-btn" (click)="submitReview()" [disabled]="!isAuthenticated">Post review</button>
+        </div>
+
+        <article class="review" *ngFor="let review of current.reviews">
+          <div class="review-avatar">{{ review.avatar }}</div>
+          <div class="review-body">
+            <div class="review-head">
+              <strong>{{ review.author }}</strong>
+              <span>{{ review.createdAt }}</span>
+              <span class="review-stars">{{ stars(review.rating).join('') }}</span>
+            </div>
+            <p>{{ review.comment }}</p>
+          </div>
+        </article>
+      </section>
+    </div>
+
+    <aside class="side-column">
+      <section class="card">
+        <div class="servings-row">
+          <h2>Ingredients</h2>
+          <div class="servings-controls">
+            <button type="button" (click)="changeServings(-1)">-</button>
+            <span>{{ selectedServings }}</span>
+            <button type="button" (click)="changeServings(1)">+</button>
+          </div>
+        </div>
+        <label
+          class="ingredient"
+          *ngFor="let ingredient of current.ingredients; let index = index"
+          [class.checked]="checkedIngredients.has(index)"
+        >
+          <input type="checkbox" [checked]="checkedIngredients.has(index)" (change)="toggleIngredient(index)" />
+          <span class="ingredient-copy">
+            <strong>{{ scaledAmount(ingredient.amount) }} {{ ingredient.unit }}</strong>
+            {{ ingredient.name }}
+          </span>
+        </label>
+      </section>
+
+      <section class="card">
+        <h2>Kitchen Timer</h2>
+        <div class="timer">{{ displayTime }}</div>
+        <div class="timer-actions">
+          <button type="button" class="primary-btn" (click)="startPauseTimer()">{{ isTimerRunning ? 'Pause' : 'Start' }}</button>
+          <button type="button" (click)="resetTimer()">Reset</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>More from Mzansi Kitchen</h2>
+        <button class="related-card" type="button" *ngFor="let item of relatedRecipes" (click)="openRecipe(item.id)">
+          <img class="related-image" [src]="item.imageUrl || ''" [alt]="item.title" />
+          <span>
+            <strong>{{ item.title }}</strong>
+            <small>{{ item.prepMinutes + item.cookMinutes }} min · {{ item.savedCount }} saves</small>
+          </span>
+        </button>
+      </section>
+    </aside>
+  </div>
+</section>

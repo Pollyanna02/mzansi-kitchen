@@ -1,0 +1,172 @@
+<section class="upload-page" *ngIf="draft">
+  <div class="page-header">
+    <span class="eyebrow">Share with Mzansi</span>
+    <h1>Upload Your Recipe</h1>
+    <p>Every field now saves through localStorage, so drafts, edits, and published recipes stay with the app.</p>
+    <div class="progress">
+      <div class="progress-step" [class.active]="completionStep >= 1">1. Basic Info</div>
+      <div class="progress-step" [class.active]="completionStep >= 2">2. Ingredients</div>
+      <div class="progress-step" [class.active]="completionStep >= 3">3. Method</div>
+      <div class="progress-step" [class.active]="completionStep >= 4">4. Review</div>
+    </div>
+  </div>
+
+  <div class="upload-layout">
+    <div class="main-column">
+      <section class="card">
+        <h2>Basic Information</h2>
+        <div class="field">
+          <label>Recipe Name</label>
+          <input [(ngModel)]="draft.title" (ngModelChange)="onFieldChange()" placeholder="My Gogo's Pap & Wors" />
+        </div>
+        <div class="field">
+          <label>Short Description</label>
+          <textarea [(ngModel)]="draft.description" (ngModelChange)="onFieldChange()" rows="4" placeholder="Tell cooks what makes this recipe special"></textarea>
+        </div>
+        <div class="field">
+          <label>Category</label>
+          <div class="pill-row">
+            <button
+              *ngFor="let category of categoryOptions"
+              type="button"
+              [class.active]="isSelectedCategory(category)"
+              (click)="selectCategory(category)"
+            >
+              {{ category }}
+            </button>
+          </div>
+        </div>
+        <div class="field-grid">
+          <label>
+            Prep Time
+            <input type="number" [(ngModel)]="draft.prepMinutes" (ngModelChange)="onFieldChange()" min="0" />
+          </label>
+          <label>
+            Cook Time
+            <input type="number" [(ngModel)]="draft.cookMinutes" (ngModelChange)="onFieldChange()" min="0" />
+          </label>
+          <label>
+            Servings
+            <input type="number" [(ngModel)]="draft.servings" (ngModelChange)="onFieldChange()" min="1" />
+          </label>
+        </div>
+        <div class="field-grid field-grid-two">
+          <label>
+            Difficulty
+            <select [(ngModel)]="draft.difficulty" (ngModelChange)="onFieldChange()">
+              <option>Easy</option>
+              <option>Medium</option>
+              <option>Hard</option>
+            </select>
+          </label>
+          <label>
+            Spice Level
+            <select [(ngModel)]="draft.spiceLevel" (ngModelChange)="onFieldChange()">
+              <option>Mild</option>
+              <option>Medium</option>
+              <option>Hot</option>
+              <option>Sweet</option>
+            </select>
+          </label>
+        </div>
+        <div class="field">
+          <label>Dietary Tags</label>
+          <div class="pill-row">
+            <button
+              *ngFor="let tag of dietaryOptions"
+              type="button"
+              [class.active]="isSelectedDietaryTag(tag)"
+              (click)="toggleDietaryTag(tag)"
+            >
+              {{ tag }}
+            </button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Recipe Photos</label>
+          <input type="file" accept="image/*" multiple (change)="onFilesSelected($event)" />
+          <div class="image-grid" *ngIf="draft.imagePreviews.length">
+            <div class="image-card" *ngFor="let image of draft.imagePreviews; let index = index">
+              <img [src]="image" alt="Recipe preview" />
+              <button type="button" (click)="removeImage(index)">Remove</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="section-head">
+          <h2>Ingredients</h2>
+          <button type="button" (click)="addIngredient()">Add ingredient</button>
+        </div>
+        <div class="ingredient-row" *ngFor="let ingredient of draft.ingredients; let index = index">
+          <input [(ngModel)]="ingredient.amount" (ngModelChange)="onFieldChange()" placeholder="2" />
+          <input [(ngModel)]="ingredient.unit" (ngModelChange)="onFieldChange()" placeholder="cups" />
+          <input [(ngModel)]="ingredient.name" (ngModelChange)="onFieldChange()" placeholder="white maize meal" />
+          <button type="button" (click)="removeIngredient(index)">x</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="section-head">
+          <h2>Method</h2>
+          <button type="button" (click)="addStep()">Add step</button>
+        </div>
+        <div class="step-row" *ngFor="let step of draft.steps; let index = index">
+          <div class="step-num">{{ index + 1 }}</div>
+          <textarea [(ngModel)]="draft.steps[index]" (ngModelChange)="onFieldChange()" rows="3" placeholder="Explain this step clearly"></textarea>
+          <button type="button" (click)="removeStep(index)">x</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Review & Submit</h2>
+        <p class="notice">Saving a draft updates localStorage immediately, and publishing adds the recipe to the rest of the app.</p>
+        <div class="submit-row">
+          <button type="button" (click)="saveDraft()">Save as draft</button>
+          <button type="button" class="primary-btn" (click)="publishRecipe()">Publish recipe</button>
+        </div>
+      </section>
+    </div>
+
+    <aside class="side-column">
+      <section class="card preview-card">
+        <div class="preview-image" *ngIf="draft.imagePreviews.length; else emojiPreview">
+          <img [src]="draft.imagePreviews[0]" alt="Recipe preview" />
+        </div>
+        <ng-template #emojiPreview>
+          <div class="preview-emoji">{{ previewEmoji() }}</div>
+        </ng-template>
+        <div class="preview-copy">
+          <span>{{ draft.category }}</span>
+          <h3>{{ draft.title || 'Your recipe title...' }}</h3>
+          <p>{{ draft.description || 'Your description will appear here.' }}</p>
+          <div class="preview-meta">
+            <span>{{ totalMinutes() }} min total</span>
+            <span>{{ draft.servings || 0 }} servings</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Tips for a great recipe</h2>
+        <ul>
+          <li>Use clear step-by-step instructions so new cooks can follow along.</li>
+          <li>Add a few dietary tags so your recipe is easier to browse later.</li>
+          <li>Upload a photo when you can because it now persists with the draft.</li>
+        </ul>
+      </section>
+    </aside>
+  </div>
+
+  <div class="success-overlay" *ngIf="successRecipeId">
+    <div class="success-box">
+      <h2>Recipe published</h2>
+      <p>Your recipe is now part of the app state and available on the recipe and profile screens.</p>
+      <div class="submit-row">
+        <button type="button" class="primary-btn" (click)="viewRecipe()">View recipe</button>
+        <button type="button" (click)="startNewRecipe()">Start another</button>
+      </div>
+    </div>
+  </div>
+</section>

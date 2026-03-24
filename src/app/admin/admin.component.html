@@ -1,0 +1,26 @@
+<section class="admin-page">
+  <div class="hero">
+    <div class="eyebrow">Authorization</div>
+    <h1>Admin Console</h1>
+    <p>This page is protected by an admin role guard. Contributor accounts can sign in, but only admins can open this route.</p>
+  </div>
+
+  <section class="card">
+    <h2>Current Session</h2>
+    <p *ngIf="currentUser as user">{{ user.name }} · {{ user.email }} · {{ user.role }}</p>
+  </section>
+
+  <section class="card">
+    <h2>Registered Accounts</h2>
+    <div class="user-grid">
+      <article class="user-card" *ngFor="let user of users">
+        <div class="avatar">{{ user.avatar }}</div>
+        <div>
+          <strong>{{ user.name }}</strong>
+          <p>{{ user.email }}</p>
+          <small>{{ user.role }}</small>
+        </div>
+      </article>
+    </div>
+  </section>
+</section>
